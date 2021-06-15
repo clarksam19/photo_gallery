@@ -16,6 +16,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   request.send();
 
+  const slides = document.querySelectorAll('#slides figure');
+  slides[0].classList.add('visible');
+  console.log('firstSlide :>> ', slides);
+  debugger;
+  const previousSlideBtn = document.querySelector('a.prev');
+  const nextSlideBtn = document.querySelector('a.next');  
+  
+  previousSlideBtn.addEventListener('click', (event) => {
+    const currentVisiblePhoto = document.querySelector(".visible");
+    const dataId = +currentVisiblePhoto?.dataset.id;
+    const prevSlide = chooseNextVisiblePhotoId(dataId, 'prev');
+  });
+  nextSlideBtn.addEventListener('click', (event) => {
+    const currentVisiblePhoto = document.querySelector(".visible");
+    const dataId = +currentVisiblePhoto?.dataset.id;
+    const nextSlide = chooseNextVisiblePhotoId(dataId, 'next');
+  });
+    // Attach events to the previous and next anchors to fade out the current photo and fade in the new one at the same time
+  
+  // If we're on the first photo and click "previous", we loop to the last one. 
+      //Clicking "next" when on the last one should bring the first photo.
+  
+  // Each slide transition will also render the photo details for that photo below it
+  // When the slideshow is advanced, request and render the comments for that photo
 });
 
 function loadPhotos(data) {
@@ -51,4 +75,21 @@ function loadComments(data, index = 0) {
   });
   
   request.send();
+}
+
+function chooseNextVisiblePhotoId(currentId, direction = 'next') {
+  if (currentId === 1) {
+    return direction === 'next' ? 2 : 3
+  } else if (currentId === 3) {
+    return direction === 'next' ? 1 : 2
+  } else {
+    return direction === 'next' ? 3 : 1
+  }
+}
+
+function toggleVisibility(slide) {
+  if (typeof slide !== undefined) {
+    slide.classList.toggle('visible');
+    slide.classList.toggle('invisible');
+  }
 }
