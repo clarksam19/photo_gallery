@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   let slides;
+  const previousSlideBtn = document.querySelector("a.prev");
+  const nextSlideBtn = document.querySelector("a.next");
 
   let request = new XMLHttpRequest();
   request.open('GET', 'http://localhost:3000/photos');
   request.addEventListener('load', (e) => {
     let data = JSON.parse(request.response);
     loadPhotos(data);
-    //below two functions take second index arg for accessing current photo/comments
-      //might end up being better to use photo_id
     loadPhotoInfo(data);
     loadComments(data);
 
+    // Assign newly rendered slide DOM nodes
     slides = document.querySelectorAll('#slides figure');
-    // Add classes to rendered html
+    // Add classes to rendered nodes
     slides[0].classList.add('visible');
     slides[1].classList.add('invisible');
     slides[2].classList.add('invisible');
@@ -23,28 +24,34 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   request.send();
-  
-  const previousSlideBtn = document.querySelector('a.prev');
+
   previousSlideBtn.addEventListener('click', (event) => {
     const currentSlide = document.querySelector(".visible");
     const dataId = currentSlide && currentSlide.dataset.id;
-    const prevSlide = slides[chooseAdjacentPhotoId(+dataId, 'prev') - 1];
+    const photoIdx = chooseAdjacentPhotoId(+dataId, "prev");
+    const prevSlide = slides[photoIdx - 1];
 
     [currentSlide, prevSlide].forEach(toggleVisibility);
+    loadPhotoInfo(photoIdx); // TODO: Refactor loadPhotoInfo function to suit this implementation
+    loadComments(photoIdx); // TODO: Refactor loadComments function to suit this implementation
   });
-  
-  const nextSlideBtn = document.querySelector('a.next');  
+
   nextSlideBtn.addEventListener('click', (event) => {
     const currentSlide = document.querySelector(".visible");
     const dataId = currentSlide && currentSlide.dataset.id;
-    const nextSlide = slides[chooseAdjacentPhotoId(+dataId, 'next') - 1];
+    const photoIdx = chooseAdjacentPhotoId(+dataId, "next");
+    const nextSlide = slides[photoIdx- 1];
+    
     [currentSlide, nextSlide].forEach(toggleVisibility);
+    loadPhotoInfo(photoIdx);
+    loadComments(photoIdx);
   });
   
   // Each slide transition will also render the photo details for that photo below it
   // When the slideshow is advanced, request and render the comments for that photo
 });
 
+//NOTE: The following implementations are dependent on the 'data' argument, so it is making it difficult to call them from an event listener without refetching the data. Could you have a go at implementing a solution where the data is stored in memory after fetching? Then we could switch out the details/comments just by passing an index.
 function loadPhotos(data) {
   let photosTemplateSource = document.getElementById('photos').innerHTML;
   let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
