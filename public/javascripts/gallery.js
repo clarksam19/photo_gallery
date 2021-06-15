@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  //outer scope data variable
+  let data;
   let slides;
   const previousSlideBtn = document.querySelector("a.prev");
   const nextSlideBtn = document.querySelector("a.next");
@@ -6,17 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let request = new XMLHttpRequest();
   request.open('GET', 'http://localhost:3000/photos');
   request.addEventListener('load', (e) => {
-    let data = JSON.parse(request.response);
+    data = JSON.parse(request.response);
     loadPhotos(data);
     loadPhotoInfo(data);
     loadComments(data);
 
-    // Assign newly rendered slide DOM nodes
     slides = document.querySelectorAll('#slides figure');
-    // Add classes to rendered nodes
-    slides[0].classList.add('visible');
-    slides[1].classList.add('invisible');
-    slides[2].classList.add('invisible');
+    // Generalized addition of classes, regardless of slides length
+    slides.forEach((slide, idx) => {
+      idx === 0 ? slide.classList.add('visible')
+      : slide.classList.add('invisible');
+    });
   });
 
   request.addEventListener('error', (e) => {
@@ -27,31 +29,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   previousSlideBtn.addEventListener('click', (event) => {
     const currentSlide = document.querySelector(".visible");
-    const dataId = currentSlide && currentSlide.dataset.id;
-    const photoIdx = chooseAdjacentPhotoId(+dataId, "prev");
-    const prevSlide = slides[photoIdx - 1];
+    const dataId = Number(currentSlide.dataset.id);
+    //wrapping index based on slides length and direction
+    const photoIdx = dataId === 1 ? slides.length - 1 : dataId - 2;
+    const prevSlide = slides[photoIdx];
 
     [currentSlide, prevSlide].forEach(toggleVisibility);
-    loadPhotoInfo(photoIdx); // TODO: Refactor loadPhotoInfo function to suit this implementation
-    loadComments(photoIdx); // TODO: Refactor loadComments function to suit this implementation
+    //Pass in outer scope data variable
+    loadPhotoInfo(data, photoIdx);
+    loadComments(data, photoIdx);
   });
 
   nextSlideBtn.addEventListener('click', (event) => {
     const currentSlide = document.querySelector(".visible");
-    const dataId = currentSlide && currentSlide.dataset.id;
-    const photoIdx = chooseAdjacentPhotoId(+dataId, "next");
-    const nextSlide = slides[photoIdx- 1];
+    const dataId = Number(currentSlide.dataset.id);
+    //wrapping index based on slides length and direction
+    const photoIdx = data[dataId] ? dataId : 0;
+    const nextSlide = slides[photoIdx];
     
     [currentSlide, nextSlide].forEach(toggleVisibility);
-    loadPhotoInfo(photoIdx);
-    loadComments(photoIdx);
+    //Pass in outer scope data variable
+    loadPhotoInfo(data, photoIdx);
+    loadComments(data, photoIdx);
   });
   
-  // Each slide transition will also render the photo details for that photo below it
-  // When the slideshow is advanced, request and render the comments for that photo
 });
 
-//NOTE: The following implementations are dependent on the 'data' argument, so it is making it difficult to call them from an event listener without refetching the data. Could you have a go at implementing a solution where the data is stored in memory after fetching? Then we could switch out the details/comments just by passing an index.
 function loadPhotos(data) {
   let photosTemplateSource = document.getElementById('photos').innerHTML;
   let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
@@ -86,17 +89,7 @@ function loadComments(data, index = 0) {
   
   request.send();
 }
-
-function chooseAdjacentPhotoId(currentId, direction = 'next') {
-  if (currentId === 1) {
-    return direction === 'next' ? 2 : 3
-  } else if (currentId === 3) {
-    return direction === 'next' ? 1 : 2
-  } else {
-    return direction === 'next' ? 3 : 1
-  }
-}
-
+//removed helper function for determining index
 function toggleVisibility({classList}) {
   if (typeof classList !== undefined && classList.length > 0) {
     if (classList.contains('invisible')) {
