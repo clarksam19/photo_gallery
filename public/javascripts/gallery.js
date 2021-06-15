@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   request.send();
+
 });
 
 function loadPhotos(data) {
@@ -29,7 +30,6 @@ function loadPhotoInfo(data, index = 0) {
   let photoInfoTemplateSource = document.getElementById('photo_information').innerHTML;
   let photoInfoTemplateFunction = Handlebars.compile(photoInfoTemplateSource);
   let photoInfoTemplate = photoInfoTemplateFunction(data[index]);
-
   document.querySelector('section > header').innerHTML = photoInfoTemplate;
 }
 

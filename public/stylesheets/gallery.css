@@ -68,8 +68,13 @@ a.favorite {
   height: 784px;
 }
 
+.visible {
+  opacity: 1;
+  transition: 0.3s opacity ease-in;
+}
+
 #slides figure + figure {
-  display: none;
+  opacity: 0;
 }
 
 #slides img {
