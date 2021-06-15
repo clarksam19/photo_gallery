@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-  //outer scope data variable
   let data;
   let slides;
+  //outer scope live list for accessing current slide
+  const visible = document.getElementsByClassName("visible");
   const previousSlideBtn = document.querySelector("a.prev");
   const nextSlideBtn = document.querySelector("a.next");
 
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComments(data);
 
     slides = document.querySelectorAll('#slides figure');
-    // Generalized addition of classes, regardless of slides length
+  
     slides.forEach((slide, idx) => {
       idx === 0 ? slide.classList.add('visible')
       : slide.classList.add('invisible');
@@ -28,9 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
   request.send();
 
   previousSlideBtn.addEventListener('click', (event) => {
-    const currentSlide = document.querySelector(".visible");
+    let currentSlide = visible[0];
     const dataId = Number(currentSlide.dataset.id);
-    //wrapping index based on slides length and direction
     const photoIdx = dataId === 1 ? slides.length - 1 : dataId - 2;
     const prevSlide = slides[photoIdx];
 
@@ -41,18 +41,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   nextSlideBtn.addEventListener('click', (event) => {
-    const currentSlide = document.querySelector(".visible");
+    let currentSlide = visible[0];
     const dataId = Number(currentSlide.dataset.id);
-    //wrapping index based on slides length and direction
     const photoIdx = data[dataId] ? dataId : 0;
     const nextSlide = slides[photoIdx];
     
     [currentSlide, nextSlide].forEach(toggleVisibility);
-    //Pass in outer scope data variable
+
     loadPhotoInfo(data, photoIdx);
     loadComments(data, photoIdx);
   });
-  
+
+  //like and favorite button functionality
+  document.querySelector('section > header').addEventListener("click", function(event) {
+    event.preventDefault();
+    let button = event.target;
+    let dataId = button.getAttribute("data-id");
+    if (dataId === '1') {
+      let path = button.getAttribute("href");
+      
+      let request = new XMLHttpRequest();
+      request.open('POST', path);
+      request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      request.send('photo_id=' + dataId);
+
+      request.addEventListener('load', () => {
+        let newTotal = JSON.parse(request.response).total;
+        button.textContent = button.textContent.replace(/\d+/, newTotal);
+      });
+    }
+  });
 });
 
 function loadPhotos(data) {
@@ -89,7 +107,7 @@ function loadComments(data, index = 0) {
   
   request.send();
 }
-//removed helper function for determining index
+
 function toggleVisibility({classList}) {
   if (typeof classList !== undefined && classList.length > 0) {
     if (classList.contains('invisible')) {
