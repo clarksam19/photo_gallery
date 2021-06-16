@@ -1,10 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   let data;
   let slides;
-  //outer scope live list for accessing current slide
   const visible = document.getElementsByClassName("visible");
   const previousSlideBtn = document.querySelector("a.prev");
   const nextSlideBtn = document.querySelector("a.next");
+  const commentSection = document.getElementById("comments");
+
+  // Perhaps we should refactor all templates into the function scope like this so they are resuable? Also in order to finish functionality we will need to filter comments for each photo ID. Part of a bigger refactor?
+  let commentPartialSource = document.getElementById("photo_comment")
+    .innerHTML;
+  Handlebars.registerPartial("photo_comment", commentPartialSource);
+  let commentsTemplateSource = document.getElementById("photo_comments")
+    .innerHTML;
+  let commentTemplateFunction = Handlebars.compile(commentPartialSource);
+  let commentsTemplateFunction = Handlebars.compile(commentsTemplateSource);
 
   let request = new XMLHttpRequest();
   request.open('GET', 'http://localhost:3000/photos');
@@ -71,42 +80,62 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-});
+  
+  //comment submission event handler
+  document.getElementById('submit-comment').addEventListener("submit", function (event) {
+    event.preventDefault();
+    let form = event.target;
+    let http = new XMLHttpRequest();
+    let fields = new FormData(form);
+    let queryString = new URLSearchParams(fields).toString();
+    fields.set("photo_id", visible[0].dataset.id);
 
-function loadPhotos(data) {
-  let photosTemplateSource = document.getElementById('photos').innerHTML;
-  let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
-  let photosTemplate = photosTemplateFunction({photos: data});
-
-  document.getElementById('slides').innerHTML = photosTemplate;
-}
-
-function loadPhotoInfo(data, index = 0) {
-  let photoInfoTemplateSource = document.getElementById('photo_information').innerHTML;
-  let photoInfoTemplateFunction = Handlebars.compile(photoInfoTemplateSource);
-  let photoInfoTemplate = photoInfoTemplateFunction(data[index]);
-  document.querySelector('section > header').innerHTML = photoInfoTemplate;
-}
-
-function loadComments(data, index = 0) {
-  let request = new XMLHttpRequest();
-  request.open('GET', `http://localhost:3000/comments?photo_id=${data[index].id}`);
-
-  request.addEventListener('load', (e) => {
-    let commentData = JSON.parse(request.response);
-
-    let commentPartialSource = document.getElementById('photo_comment').innerHTML;
-    Handlebars.registerPartial('photo_comment', commentPartialSource);
-
-    let commentsTemplateSource = document.getElementById('photo_comments').innerHTML;
-    let commentsTemplateFunction = Handlebars.compile(commentsTemplateSource);
-    let commentsTemplate = commentsTemplateFunction({comments: commentData});
-    
-    document.getElementById('comments').innerHTML = commentsTemplate;
+    http.open(form.method, form.action);
+    http.setRequestHeader(
+      "Content-Type",
+      "application/x-www-form-urlencoded; charset=UTF-8"
+    );
+    http.onload = function () {
+      let newComment = JSON.parse(http.response);
+      
+      form.insertAdjacentHTML(
+        "beforebegin",
+        commentTemplateFunction(newComment)
+      );
+      form.reset();
+    };
+    http.send(queryString);
   });
   
-  request.send();
-}
+  function loadPhotos(data) {
+    let photosTemplateSource = document.getElementById('photos').innerHTML;
+    let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
+    let photosTemplate = photosTemplateFunction({photos: data});
+  
+    document.getElementById('slides').innerHTML = photosTemplate;
+  }
+  
+  function loadPhotoInfo(data, index = 0) {
+    let photoInfoTemplateSource = document.getElementById('photo_information').innerHTML;
+    let photoInfoTemplateFunction = Handlebars.compile(photoInfoTemplateSource);
+    let photoInfoTemplate = photoInfoTemplateFunction(data[index]);
+    document.querySelector('section > header').innerHTML = photoInfoTemplate;
+  }
+  
+  function loadComments(data, index = 0) {
+    let request = new XMLHttpRequest();
+    request.open('GET', `http://localhost:3000/comments?photo_id=${data[index].id}`);
+  
+    request.addEventListener('load', (e) => {
+      let commentData = JSON.parse(request.response);
+      let commentsTemplate = commentsTemplateFunction({comments: commentData});
+      // TODO: filter comments by current image id (photo_id)
+      commentSection.insertAdjacentHTML('afterbegin', commentsTemplate);
+    });
+    
+    request.send();
+  }
+});
 
 function toggleVisibility({classList}) {
   if (typeof classList !== undefined && classList.length > 0) {

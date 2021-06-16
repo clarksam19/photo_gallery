@@ -132,6 +132,13 @@ section header {
   z-index: 1;
 }
 
+#comments form {
+  margin: 1rem auto;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
+
 #comments figure {
   float: left;
   margin: 0 20px 0 0;
@@ -196,4 +203,5 @@ input[type="email"] {
 textarea {
   border: 1px solid #cecece;
   border-radius: 4px;
+  width: 250px;
 }
