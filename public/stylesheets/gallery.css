@@ -132,13 +132,6 @@ section header {
   z-index: 1;
 }
 
-#comments form {
-  margin: 1rem auto;
-  width: 50%;
-  display: flex;
-  justify-content: center;
-}
-
 #comments figure {
   float: left;
   margin: 0 20px 0 0;
@@ -173,6 +166,13 @@ section header {
   padding-top: 20px;
   margin-top: 20px;
   border-top: 1px solid #cecece;
+}
+/* form no longer nested in #comments */
+form {
+  margin: 1rem auto;
+  width: 50%;
+  display: flex;
+  justify-content: center;
 }
 
 form h4 {

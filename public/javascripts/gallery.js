@@ -6,13 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextSlideBtn = document.querySelector("a.next");
   const commentSection = document.getElementById("comments");
 
-  // Perhaps we should refactor all templates into the function scope like this so they are resuable? Also in order to finish functionality we will need to filter comments for each photo ID. Part of a bigger refactor?
   let commentPartialSource = document.getElementById("photo_comment")
     .innerHTML;
   Handlebars.registerPartial("photo_comment", commentPartialSource);
   let commentsTemplateSource = document.getElementById("photo_comments")
     .innerHTML;
-  let commentTemplateFunction = Handlebars.compile(commentPartialSource);
+  // no need to compile partials
   let commentsTemplateFunction = Handlebars.compile(commentsTemplateSource);
 
   let request = new XMLHttpRequest();
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevSlide = slides[photoIdx];
 
     [currentSlide, prevSlide].forEach(toggleVisibility);
-    //Pass in outer scope data variable
+    
     loadPhotoInfo(data, photoIdx);
     loadComments(data, photoIdx);
   });
@@ -61,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComments(data, photoIdx);
   });
 
-  //like and favorite button functionality
   document.querySelector('section > header').addEventListener("click", function(event) {
     event.preventDefault();
     let button = event.target;
@@ -81,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  //comment submission event handler
   document.getElementById('submit-comment').addEventListener("submit", function (event) {
     event.preventDefault();
     let form = event.target;
@@ -89,21 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let fields = new FormData(form);
     let queryString = new URLSearchParams(fields).toString();
     fields.set("photo_id", visible[0].dataset.id);
+    let photoIdx = Number(visible[0].dataset.id) - 1;
 
     http.open(form.method, form.action);
     http.setRequestHeader(
       "Content-Type",
       "application/x-www-form-urlencoded; charset=UTF-8"
     );
+
     http.onload = function () {
-      let newComment = JSON.parse(http.response);
-      
-      form.insertAdjacentHTML(
-        "beforebegin",
-        commentTemplateFunction(newComment)
-      );
+      //reload comments using index instead of inserting html
+      loadComments(data, photoIdx);
       form.reset();
     };
+    
     http.send(queryString);
   });
   
@@ -129,8 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     request.addEventListener('load', (e) => {
       let commentData = JSON.parse(request.response);
       let commentsTemplate = commentsTemplateFunction({comments: commentData});
-      // TODO: filter comments by current image id (photo_id)
-      commentSection.insertAdjacentHTML('afterbegin', commentsTemplate);
+      commentSection.innerHTML = commentsTemplate;
     });
     
     request.send();
