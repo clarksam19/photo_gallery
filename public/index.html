@@ -48,51 +48,23 @@
           </div>
         </header>
 
-        <div id="comments">
-          <h3>Comments</h3>
-          <ul>
-            <li>
-              <article>
-                <figure>
-                  <img src="http://gravatar.com/avatar/9f6f9c0b100d371267f07a12f73edf9d">
-                </figure>
-                <header>
-                  <h1>Shane Riley</h1>
-                  <p><small><time>Posted 3/31/15</time></small></p>
-                </header>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-              </article>
-            </li>
-            <li>
-              <article>
-                <figure>
-                  <img src="http://gravatar.com/avatar/0af2673451bb2c52eda2a7aa1f2467c9">
-                </figure>
-                <header>
-                  <h1>Constance Zemicky</h1>
-                  <p><small><time>Posted 3/31/15</time></small></p>
-                </header>
-                <p>Keffiyeh next level readymade, hashtag chillwave tofu freegan PBR&amp;B cray four dollar toast Echo Park art party American Apparel Portland skateboard. Semiotics Bushwick flexitarian, plaid drinking vinegar deep v keytar lomo squid banjo sustainable try-hard PBR cronut ethical. Scenester bitters roof party tofu, disrupt flannel deep v Brooklyn meditation actually blog Austin pop-up Thundercats wayfarers. Fingerstache High Life brunch VHS, sriracha Bushwick hashtag Helvetica banh mi raw denim. Flannel Etsy keffiyeh blog stumptown bespoke leggings cornhole. Heirloom PBR&amp;B letterpress blog Odd Future readymade messenger bag, aesthetic literally. Yr Banksy banh mi authentic PBR.</p>
-              </article>
-            </li>
-          </ul>
-
-          <form action="/comments/new" method="post">
-            <fieldset>
-              <input type="hidden" name="photo_id" value="1">
-              <h4>Your Comment</h4>
-              <dl>
-                <dt><label for="name">Your Name</label></dt>
-                <dd><input type="text" name="name" id="name"></dd>
-                <dt><label for="email">Email Address</label></dt>
-                <dd><input type="email" name="email" id="email" placeholder="you@example.com"></dd>
-                <dt><label for="body">Comment</label></dt>
-                <dd><textarea rows="6" cols="40" name="body" id="body"></textarea></dd>
-              </dl>
-              <input type="submit" value="Post Comment" class="button">
-            </fieldset>
-          </form>
-        </div>
+        <div id="comments"></div>
+        <!-- moved new comment form out of comments div for simpler comment loading-->
+        <form id="submit-comment" action="/comments/new" method="post">
+          <fieldset>
+            <input hidden name="photo_id" value="1">
+            <h4>Your Comment</h4>
+            <dl>
+              <dt><label for="name">Your Name</label></dt>
+              <dd><input type="text" name="name" id="name"></dd>
+              <dt><label for="email">Email Address</label></dt>
+              <dd><input type="email" name="email" id="email" placeholder="you@example.com"></dd>
+              <dt><label for="body">Comment</label></dt>
+              <dd><textarea rows="6" cols="40" name="body" id="body"></textarea></dd>
+            </dl>
+            <input type="submit" value="Post Comment" class="button">
+          </fieldset>
+        </form>
       </section>
     </main>
 

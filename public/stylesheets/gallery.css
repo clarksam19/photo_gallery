@@ -167,6 +167,13 @@ section header {
   margin-top: 20px;
   border-top: 1px solid #cecece;
 }
+/* form no longer nested in #comments */
+form {
+  margin: 1rem auto;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
 
 form h4 {
   padding: 0 0 15px 0;
@@ -196,4 +203,5 @@ input[type="email"] {
 textarea {
   border: 1px solid #cecece;
   border-radius: 4px;
+  width: 250px;
 }
