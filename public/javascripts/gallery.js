@@ -95,14 +95,20 @@ document.addEventListener('DOMContentLoaded', () => {
       "Content-Type",
       "application/x-www-form-urlencoded; charset=UTF-8"
     );
+
     http.onload = function () {
       let newComment = JSON.parse(http.response);
       
-      form.insertAdjacentHTML(
-        "beforebegin",
-        commentTemplateFunction(newComment)
-      );
+      if (http.status === 200) {
+        commentSection.insertAdjacentHTML(
+          "beforeend",
+          commentTemplateFunction(newComment)
+        )
+      } else {
+        console.log('There was an error (add some client side notification here..)')
+      };
       form.reset();
+    
     };
     http.send(queryString);
   });
