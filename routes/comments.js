@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var _ = require("underscore");
 var md5 = require("MD5");
+const { body,validationResult } = require('express-validator');
 
 var comments = JSON.parse(fs.readFileSync(path.resolve(path.dirname(__dirname), "data/comments.json"), "utf8"));
 
@@ -23,17 +24,26 @@ router.get("/comments", function(req, res) {
   res.json(photo_comments);
 });
 
-router.post("/comments/new", function(req, res) {
-  var comment = {};
+router.post("/comments/new",
+  body('name').not().isEmpty().trim().escape(),
+  body("email").isEmail().normalizeEmail(),
+  body('body').not().isEmpty().trim().escape(),
+  function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    var comment = {};
 
-  comment.body = req.body.body;
-  comment.name = req.body.name;
-  comment.date = getFormattedDate();
-  comment.photo_id = +req.body.photo_id;
-  comment.gravatar = convertToGravatar(req.body.email);
-  comments.push(comment);
+    comment.body = req.body.body;
+    comment.name = req.body.name;
+    comment.date = getFormattedDate();
+    comment.photo_id = +req.body.photo_id;
+    comment.gravatar = convertToGravatar(req.body.email);
 
-  res.json(comment);
+    comments.push(comment);
+
+    res.json(comment);
 });
 
 module.exports = router;

@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let commentData = JSON.parse(request.response);
       let commentsTemplate = commentsTemplateFunction({comments: commentData});
       // TODO: filter comments by current image id (photo_id)
-      commentSection.insertAdjacentHTML('afterbegin', commentsTemplate);
+      commentSection.innerHTML = commentsTemplate;
     });
     
     request.send();
