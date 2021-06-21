@@ -11,16 +11,49 @@ document.addEventListener('DOMContentLoaded', () => {
   Handlebars.registerPartial("photo_comment", commentPartialSource);
   let commentsTemplateSource = document.getElementById("photo_comments")
     .innerHTML;
-  // no need to compile partials
   let commentsTemplateFunction = Handlebars.compile(commentsTemplateSource);
+  
+  function loadPhotos() {
+    let photosTemplateSource = document.getElementById("photos").innerHTML;
+    let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
+    let photosTemplate = photosTemplateFunction({ photos: data });
+
+    document.getElementById("slides").innerHTML = photosTemplate;
+  }
+
+  function loadPhotoInfo(index = 0) {
+    let photoInfoTemplateSource = document.getElementById("photo_information")
+      .innerHTML;
+    let photoInfoTemplateFunction = Handlebars.compile(photoInfoTemplateSource);
+    let photoInfoTemplate = photoInfoTemplateFunction(data[index]);
+    document.querySelector("section > header").innerHTML = photoInfoTemplate;
+  }
+
+  function loadComments(index = 0) {
+    let request = new XMLHttpRequest();
+    request.open(
+      "GET",
+      `http://localhost:3000/comments?photo_id=${data[index].id}`
+    );
+
+    request.addEventListener("load", (e) => {
+      let commentData = JSON.parse(request.response);
+      let commentsTemplate = commentsTemplateFunction({
+        comments: commentData,
+      });
+      commentSection.innerHTML = commentsTemplate;
+    });
+
+    request.send();
+  }
 
   let request = new XMLHttpRequest();
   request.open('GET', 'http://localhost:3000/photos');
   request.addEventListener('load', (e) => {
     data = JSON.parse(request.response);
-    loadPhotos(data);
-    loadPhotoInfo(data);
-    loadComments(data);
+    loadPhotos();
+    loadPhotoInfo();
+    loadComments();
 
     slides = document.querySelectorAll('#slides figure');
   
@@ -44,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     [currentSlide, prevSlide].forEach(toggleVisibility);
     
-    loadPhotoInfo(data, photoIdx);
-    loadComments(data, photoIdx);
+    loadPhotoInfo(photoIdx);
+    loadComments(photoIdx);
   });
 
   nextSlideBtn.addEventListener('click', (event) => {
@@ -56,8 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     [currentSlide, nextSlide].forEach(toggleVisibility);
 
-    loadPhotoInfo(data, photoIdx);
-    loadComments(data, photoIdx);
+    loadPhotoInfo(photoIdx);
+    loadComments(photoIdx);
   });
 
   document.querySelector('section > header').addEventListener("click", function(event) {
@@ -96,40 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     http.onload = function () {
       //reload comments using index instead of inserting html
-      loadComments(data, photoIdx);
+      loadComments(photoIdx);
       form.reset();
     };
     
     http.send(queryString);
   });
-  
-  function loadPhotos(data) {
-    let photosTemplateSource = document.getElementById('photos').innerHTML;
-    let photosTemplateFunction = Handlebars.compile(photosTemplateSource);
-    let photosTemplate = photosTemplateFunction({photos: data});
-  
-    document.getElementById('slides').innerHTML = photosTemplate;
-  }
-  
-  function loadPhotoInfo(data, index = 0) {
-    let photoInfoTemplateSource = document.getElementById('photo_information').innerHTML;
-    let photoInfoTemplateFunction = Handlebars.compile(photoInfoTemplateSource);
-    let photoInfoTemplate = photoInfoTemplateFunction(data[index]);
-    document.querySelector('section > header').innerHTML = photoInfoTemplate;
-  }
-  
-  function loadComments(data, index = 0) {
-    let request = new XMLHttpRequest();
-    request.open('GET', `http://localhost:3000/comments?photo_id=${data[index].id}`);
-  
-    request.addEventListener('load', (e) => {
-      let commentData = JSON.parse(request.response);
-      let commentsTemplate = commentsTemplateFunction({comments: commentData});
-      commentSection.innerHTML = commentsTemplate;
-    });
-    
-    request.send();
-  }
 });
 
 function toggleVisibility({classList}) {
